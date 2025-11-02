@@ -69,38 +69,57 @@ export class HomeComponent implements OnInit {
   }
 
   addRecipe(): void {
-    if (!this.newRecipe.title) {
-      alert('נא להזין שם למתכון');
-      return;
-    }
-
-    this.isAddingRecipe = true;
-
-    this.apiService.createRecipe(
-      this.newRecipe.title || '',
-      this.newRecipe.ingredients || '',
-      this.newRecipe.instructions || '',
-      this.newRecipe.tags || '',
-      this.newRecipe.preparationTime || 0
-    ).subscribe({
-      next: (recipe: Recipe) => {
-        this.recipes.push(recipe);
-        this.newRecipe = {
-          title: '',
-          ingredients: '',
-          instructions: '',
-          tags: '',
-          preparationTime: 0
-        };
-        this.isAddingRecipe = false;
-        alert('המתכון נוסף בהצלחה!');
-      },
-      error: (err: any) => {
-        alert('שגיאה בהוספת מתכון');
-        this.isAddingRecipe = false;
-      }
-    });
+  // ===== VALIDATION =====
+  if (!this.newRecipe.title || this.newRecipe.title.trim() === '') {
+    alert('⚠️ שם המתכון הוא חובה');
+    return;
   }
+  
+  if (!this.newRecipe.ingredients || this.newRecipe.ingredients.trim() === '') {
+    alert('⚠️ רכיבים הם חובה');
+    return;
+  }
+
+  if (!this.newRecipe.instructions || this.newRecipe.instructions.trim() === '') {
+    alert('⚠️ הוראות הכנה הן חובה');
+    return;
+  }
+
+  if (this.newRecipe.preparationTime === undefined || this.newRecipe.preparationTime === null || this.newRecipe.preparationTime < 1) {
+    alert('⚠️ זמן הכנה חייב להיות חיובי');
+    return;
+  }
+  // ===== END VALIDATION =====
+
+  this.isAddingRecipe = true;
+
+  this.apiService.createRecipe(
+    this.newRecipe.title || '',
+    this.newRecipe.ingredients || '',
+    this.newRecipe.instructions || '',
+    this.newRecipe.tags || '',
+    this.newRecipe.preparationTime || 0
+  ).subscribe({
+    next: (recipe: Recipe) => {
+      this.recipes.push(recipe);
+      this.newRecipe = {
+        title: '',
+        ingredients: '',
+        instructions: '',
+        tags: '',
+        preparationTime: undefined
+      };
+      this.isAddingRecipe = false;
+      alert('✅ המתכון נוסף בהצלחה!');
+    },
+    error: (err: any) => {
+      console.error('API Error:', err);
+      alert('❌ שגיאה בהוספת מתכון: ' + (err.error?.message || 'נסה שנית'));
+      this.isAddingRecipe = false;
+    }
+  });
+}
+
 
   editRecipe(recipe: Recipe): void {
     this.isEditingRecipe = true;
@@ -109,33 +128,57 @@ export class HomeComponent implements OnInit {
   }
 
   saveEditedRecipe(): void {
-    if (!this.editingRecipeId) return;
-
-    this.isAddingRecipe = true;
-
-    this.apiService.updateRecipe(
-      this.editingRecipeId,
-      this.newRecipe.title || '',
-      this.newRecipe.ingredients || '',
-      this.newRecipe.instructions || '',
-      this.newRecipe.tags || '',
-      this.newRecipe.preparationTime || 0
-    ).subscribe({
-      next: (updatedRecipe: Recipe) => {
-        const index = this.recipes.findIndex(r => r.id === this.editingRecipeId);
-        if (index !== -1) {
-          this.recipes[index] = updatedRecipe;
-        }
-        this.cancelEdit();
-        this.isAddingRecipe = false;
-        alert('המתכון עודכן בהצלחה!');
-      },
-      error: (err: any) => {
-        alert('שגיאה בעדכון מתכון');
-        this.isAddingRecipe = false;
-      }
-    });
+  // ===== VALIDATION =====
+  if (!this.newRecipe.title || this.newRecipe.title.trim() === '') {
+    alert('⚠️ שם המתכון הוא חובה');
+    return;
   }
+
+  if (!this.newRecipe.ingredients || this.newRecipe.ingredients.trim() === '') {
+    alert('⚠️ רכיבים הם חובה');
+    return;
+  }
+
+  if (!this.newRecipe.instructions || this.newRecipe.instructions.trim() === '') {
+    alert('⚠️ הוראות הכנה הן חובה');
+    return;
+  }
+
+  if (this.newRecipe.preparationTime === undefined || this.newRecipe.preparationTime === null || this.newRecipe.preparationTime < 1) {
+    alert('⚠️ זמן הכנה חייב להיות חיובי');
+    return;
+  }
+  // ===== END VALIDATION =====
+
+  if (!this.editingRecipeId) return;
+
+  this.isAddingRecipe = true;
+
+  this.apiService.updateRecipe(
+    this.editingRecipeId,
+    this.newRecipe.title || '',
+    this.newRecipe.ingredients || '',
+    this.newRecipe.instructions || '',
+    this.newRecipe.tags || '',
+    this.newRecipe.preparationTime || 0
+  ).subscribe({
+    next: (updatedRecipe: Recipe) => {
+      const index = this.recipes.findIndex(r => r.id === this.editingRecipeId);
+      if (index !== -1) {
+        this.recipes[index] = updatedRecipe;
+      }
+      this.cancelEdit();
+      this.isAddingRecipe = false;
+      alert('✅ המתכון עודכן בהצלחה!');
+    },
+    error: (err: any) => {
+      console.error('API Error:', err);
+      alert('❌ שגיאה בעדכון מתכון: ' + (err.error?.message || 'נסה שנית'));
+      this.isAddingRecipe = false;
+    }
+  });
+}
+
 
   cancelEdit(): void {
     this.isEditingRecipe = false;
