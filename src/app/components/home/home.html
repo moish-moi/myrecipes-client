@@ -11,10 +11,12 @@
   </nav>
 
   <div class="max-w-6xl mx-auto p-8">
-    <!-- Add Recipe Section -->
+    <!-- Add/Edit Recipe Section -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">הוסף מתכון חדש</h2>
-      <form (ngSubmit)="addRecipe()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">
+        {{ isEditingRecipe ? 'עדכן מתכון' : 'הוסף מתכון חדש' }}
+      </h2>
+      <form (ngSubmit)="isEditingRecipe ? saveEditedRecipe() : addRecipe()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input 
           type="text" 
           [(ngModel)]="newRecipe.title" 
@@ -53,7 +55,15 @@
           [disabled]="isAddingRecipe"
           class="col-span-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:opacity-50"
         >
-          {{ isAddingRecipe ? 'הוספה...' : 'הוסף מתכון' }}
+          {{ isAddingRecipe ? 'טוען...' : (isEditingRecipe ? 'שמור שינויים' : 'הוסף מתכון') }}
+        </button>
+        <button 
+          *ngIf="isEditingRecipe"
+          type="button" 
+          (click)="cancelEdit()"
+          class="col-span-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition"
+        >
+          ביטול
         </button>
       </form>
     </div>
@@ -78,4 +88,15 @@
             (click)="deleteRecipe(recipe.id)"
             class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
           >
-            מחיק
+            מחיקה
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Recipes Message -->
+    <div *ngIf="recipes.length === 0" class="text-center py-12">
+      <p class="text-gray-500 text-xl">אין לך מתכונים עדיין. הוסף מתכון חדש!</p>
+    </div>
+  </div>
+</div>

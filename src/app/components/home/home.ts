@@ -32,7 +32,7 @@ export class HomeComponent implements OnInit {
     ingredients: '',
     instructions: '',
     tags: '',
-    preparationTime: 0
+    preparationTime: undefined
   };
 
   constructor(
@@ -145,7 +145,7 @@ export class HomeComponent implements OnInit {
       ingredients: '',
       instructions: '',
       tags: '',
-      preparationTime: 0
+      preparationTime: undefined
     };
   }
 
