@@ -1,1 +1,81 @@
-<p>home works!</p>
+<div class="min-h-screen bg-gray-50">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-800">שלום, {{ username }}! 👋</h1>
+    <button 
+      (click)="logout()"
+      class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+    >
+      התנתק
+    </button>
+  </nav>
+
+  <div class="max-w-6xl mx-auto p-8">
+    <!-- Add Recipe Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">הוסף מתכון חדש</h2>
+      <form (ngSubmit)="addRecipe()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input 
+          type="text" 
+          [(ngModel)]="newRecipe.title" 
+          name="title"
+          placeholder="שם המתכון"
+          class="col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <textarea 
+          [(ngModel)]="newRecipe.ingredients" 
+          name="ingredients"
+          placeholder="רכיבים"
+          class="col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
+        ></textarea>
+        <textarea 
+          [(ngModel)]="newRecipe.instructions" 
+          name="instructions"
+          placeholder="הוראות הכנה"
+          class="col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
+        ></textarea>
+        <input 
+          type="text" 
+          [(ngModel)]="newRecipe.tags" 
+          name="tags"
+          placeholder="תגיות (מופרדות בפסיק)"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input 
+          type="number" 
+          [(ngModel)]="newRecipe.preparationTime" 
+          name="preparationTime"
+          placeholder="זמן הכנה (דקות)"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button 
+          type="submit" 
+          [disabled]="isAddingRecipe"
+          class="col-span-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:opacity-50"
+        >
+          {{ isAddingRecipe ? 'הוספה...' : 'הוסף מתכון' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Recipes List -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let recipe of recipes" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ recipe.title }}</h3>
+        <p class="text-gray-600 mb-2"><strong>רכיבים:</strong> {{ recipe.ingredients }}</p>
+        <p class="text-gray-600 mb-2"><strong>הוראות:</strong> {{ recipe.instructions }}</p>
+        <p class="text-gray-600 mb-2"><strong>תגיות:</strong> {{ recipe.tags }}</p>
+        <p class="text-gray-600 mb-4"><strong>זמן הכנה:</strong> {{ recipe.preparationTime }} דקות</p>
+        
+        <div class="flex gap-2">
+          <button 
+            (click)="editRecipe(recipe)"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition"
+          >
+            עריכה
+          </button>
+          <button 
+            (click)="deleteRecipe(recipe.id)"
+            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
+          >
+            מחיק
