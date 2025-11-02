@@ -24,6 +24,9 @@ export class HomeComponent implements OnInit {
   recipes: Recipe[] = [];
   username: string = '';
   isAddingRecipe: boolean = false;
+  isEditingRecipe: boolean = false;
+  editingRecipeId: number | null = null;
+  
   newRecipe: Partial<Recipe> = {
     title: '',
     ingredients: '',
@@ -45,7 +48,6 @@ export class HomeComponent implements OnInit {
   getUserInfo(): void {
     const token = this.apiService.getToken();
     if (token) {
-      // Decode JWT to get username (simplified)
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         this.username = payload.sub || 'משתמש';
@@ -101,7 +103,50 @@ export class HomeComponent implements OnInit {
   }
 
   editRecipe(recipe: Recipe): void {
-    alert('עדיין בעבודה - עריכה תגיע בקרוב!');
+    this.isEditingRecipe = true;
+    this.editingRecipeId = recipe.id;
+    this.newRecipe = { ...recipe };
+  }
+
+  saveEditedRecipe(): void {
+    if (!this.editingRecipeId) return;
+
+    this.isAddingRecipe = true;
+
+    this.apiService.updateRecipe(
+      this.editingRecipeId,
+      this.newRecipe.title || '',
+      this.newRecipe.ingredients || '',
+      this.newRecipe.instructions || '',
+      this.newRecipe.tags || '',
+      this.newRecipe.preparationTime || 0
+    ).subscribe({
+      next: (updatedRecipe: Recipe) => {
+        const index = this.recipes.findIndex(r => r.id === this.editingRecipeId);
+        if (index !== -1) {
+          this.recipes[index] = updatedRecipe;
+        }
+        this.cancelEdit();
+        this.isAddingRecipe = false;
+        alert('המתכון עודכן בהצלחה!');
+      },
+      error: (err: any) => {
+        alert('שגיאה בעדכון מתכון');
+        this.isAddingRecipe = false;
+      }
+    });
+  }
+
+  cancelEdit(): void {
+    this.isEditingRecipe = false;
+    this.editingRecipeId = null;
+    this.newRecipe = {
+      title: '',
+      ingredients: '',
+      instructions: '',
+      tags: '',
+      preparationTime: 0
+    };
   }
 
   deleteRecipe(recipeId: number): void {
