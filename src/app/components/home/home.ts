@@ -26,6 +26,9 @@ export class HomeComponent implements OnInit {
   isAddingRecipe: boolean = false;
   isEditingRecipe: boolean = false;
   editingRecipeId: number | null = null;
+  searchTerm: string = '';
+filteredRecipes: Recipe[] = [];
+
   
   newRecipe: Partial<Recipe> = {
     title: '',
@@ -58,15 +61,17 @@ export class HomeComponent implements OnInit {
   }
 
   loadRecipes(): void {
-    this.apiService.getMyRecipes().subscribe({
-      next: (recipes: Recipe[]) => {
-        this.recipes = recipes;
-      },
-      error: (err: any) => {
-        console.error('שגיאה בטעינת מתכונים', err);
-      }
-    });
-  }
+  this.apiService.getMyRecipes().subscribe({
+    next: (recipes: Recipe[]) => {
+      this.recipes = recipes;
+      this.filteredRecipes = recipes;  // ← הוסף את הזה
+    },
+    error: (err: any) => {
+      console.error('שגיאה בטעינת מתכונים', err);
+    }
+  });
+}
+
 
   addRecipe(): void {
   // ===== VALIDATION =====
@@ -102,6 +107,7 @@ export class HomeComponent implements OnInit {
   ).subscribe({
     next: (recipe: Recipe) => {
       this.recipes.push(recipe);
+      this.filteredRecipes = this.recipes;
       this.newRecipe = {
         title: '',
         ingredients: '',
@@ -197,6 +203,7 @@ export class HomeComponent implements OnInit {
       this.apiService.deleteRecipe(recipeId).subscribe({
         next: () => {
           this.recipes = this.recipes.filter(r => r.id !== recipeId);
+          this.filteredRecipes = this.recipes;
           alert('המתכון נמחק בהצלחה!');
         },
         error: (err: any) => {
@@ -205,6 +212,24 @@ export class HomeComponent implements OnInit {
       });
     }
   }
+
+  searchByTag(): void {
+  if (!this.searchTerm || this.searchTerm.trim() === '') {
+    this.filteredRecipes = this.recipes;
+    return;
+  }
+
+  const term = this.searchTerm.toLowerCase().trim();
+  this.filteredRecipes = this.recipes.filter(recipe =>
+    recipe.tags.toLowerCase().includes(term)
+  );
+}
+
+clearSearch(): void {
+  this.searchTerm = '';
+  this.filteredRecipes = this.recipes;
+}
+
 
   logout(): void {
     this.apiService.removeToken();

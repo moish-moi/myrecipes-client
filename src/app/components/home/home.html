@@ -10,6 +10,30 @@
     </button>
   </nav>
 
+  <!-- Search Bar -->
+<div class="bg-white shadow-md p-4 mb-8">
+  <div class="max-w-6xl mx-auto flex gap-4">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      name="searchTerm"
+      placeholder="🔍 חפש לפי תגיות..."
+      (input)="searchByTag()"
+      class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <button 
+      (click)="clearSearch()"
+      class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition"
+    >
+      ✕ נקה
+    </button>
+  </div>
+  <p class="max-w-6xl mx-auto mt-2 text-sm text-gray-600">
+    <strong>תוצאות:</strong> {{ filteredRecipes.length }} מתכון(ים)
+  </p>
+</div>
+
+
   <div class="max-w-6xl mx-auto p-8">
     <!-- Add/Edit Recipe Section -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -70,7 +94,7 @@
 
     <!-- Recipes List -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div *ngFor="let recipe of recipes" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+      <div *ngFor="let recipe of filteredRecipes" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
         <h3 class="text-xl font-bold text-gray-800 mb-2">{{ recipe.title }}</h3>
         <p class="text-gray-600 mb-2"><strong>רכיבים:</strong> {{ recipe.ingredients }}</p>
         <p class="text-gray-600 mb-2"><strong>הוראות:</strong> {{ recipe.instructions }}</p>
@@ -95,8 +119,10 @@
     </div>
 
     <!-- No Recipes Message -->
-    <div *ngIf="recipes.length === 0" class="text-center py-12">
-      <p class="text-gray-500 text-xl">אין לך מתכונים עדיין. הוסף מתכון חדש!</p>
+    <div *ngIf="filteredRecipes.length === 0" class="text-center py-12">
+      <p class="text-gray-500 text-xl">
+        {{ searchTerm ? 'אין מתכונים עם התגית: ' + searchTerm : 'אין לך מתכונים עדיין. הוסף מתכון חדש!' }}
+      </p>
     </div>
   </div>
 </div>
