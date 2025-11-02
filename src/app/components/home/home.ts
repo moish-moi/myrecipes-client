@@ -27,7 +27,9 @@ export class HomeComponent implements OnInit {
   isEditingRecipe: boolean = false;
   editingRecipeId: number | null = null;
   searchTerm: string = '';
-filteredRecipes: Recipe[] = [];
+  filteredRecipes: Recipe[] = [];
+  isLoadingRecipes: boolean = false;
+
 
   
   newRecipe: Partial<Recipe> = {
@@ -60,14 +62,20 @@ filteredRecipes: Recipe[] = [];
     }
   }
 
-  loadRecipes(): void {
+
+ loadRecipes(): void {
+  this.isLoadingRecipes = true;
+  
   this.apiService.getMyRecipes().subscribe({
     next: (recipes: Recipe[]) => {
       this.recipes = recipes;
-      this.filteredRecipes = recipes;  // ← הוסף את הזה
+      this.filteredRecipes = recipes;
+      this.isLoadingRecipes = false;
     },
     error: (err: any) => {
       console.error('שגיאה בטעינת מתכונים', err);
+      this.isLoadingRecipes = false;
+      alert('❌ שגיאה בטעינת המתכונים');
     }
   });
 }
