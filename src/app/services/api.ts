@@ -103,4 +103,10 @@ export class ApiService {
       }
     });
   }
+
+  uploadImageToCloudinary(formData: FormData, cloudName: string): Observable<any> {
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+  return this.http.post(url, formData);
+}
+
 }

@@ -11,6 +11,7 @@ interface Recipe {
   instructions: string;
   tags: string;
   preparationTime: number;
+  imageUrl?: string;
 }
 
 @Component({
@@ -30,6 +31,11 @@ export class HomeComponent implements OnInit {
   filteredRecipes: Recipe[] = [];
   isLoadingRecipes: boolean = false;
 
+  // העלאת תמונה עם Cloudinary
+  selectedImage: string = '';
+  cloudinaryCloudName: string = 'dbfvvswgd';
+  cloudinaryUploadPreset: string = 'myrecipes_upload';
+  isUploadingImage: boolean = false;
 
   
   newRecipe: Partial<Recipe> = {
@@ -37,7 +43,8 @@ export class HomeComponent implements OnInit {
     ingredients: '',
     instructions: '',
     tags: '',
-    preparationTime: undefined
+    preparationTime: undefined,
+    imageUrl: '' 
   };
 
   constructor(
@@ -220,6 +227,37 @@ export class HomeComponent implements OnInit {
       });
     }
   }
+
+  onImageSelected(event: any): void {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  this.isUploadingImage = true;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', this.cloudinaryUploadPreset);
+
+  // העלה ל-Cloudinary
+  this.apiService.uploadImageToCloudinary(formData, this.cloudinaryCloudName).subscribe({
+    next: (response: any) => {
+      this.selectedImage = response.secure_url;
+      this.newRecipe.imageUrl = response.secure_url;
+      this.isUploadingImage = false;
+    },
+    error: (err: any) => {
+      console.error('שגיאה בהעלאת תמונה', err);
+      alert('❌ שגיאה בהעלאת התמונה');
+      this.isUploadingImage = false;
+    }
+  });
+}
+
+clearImage(): void {
+  this.selectedImage = '';
+  this.newRecipe.imageUrl = '';
+}
+
 
   searchByTag(): void {
   if (!this.searchTerm || this.searchTerm.trim() === '') {
