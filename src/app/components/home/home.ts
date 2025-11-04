@@ -118,18 +118,23 @@ export class HomeComponent implements OnInit {
     this.newRecipe.ingredients || '',
     this.newRecipe.instructions || '',
     this.newRecipe.tags || '',
-    this.newRecipe.preparationTime || 0
+    this.newRecipe.preparationTime || 0,
+    this.newRecipe.imageUrl || ''
   ).subscribe({
     next: (recipe: Recipe) => {
       this.recipes.push(recipe);
       this.filteredRecipes = this.recipes;
+      this.selectedImage = '';
       this.newRecipe = {
         title: '',
         ingredients: '',
         instructions: '',
         tags: '',
-        preparationTime: undefined
+        preparationTime: undefined,
+        imageUrl: ''
       };
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+          if (fileInput) fileInput.value = '';
       this.isAddingRecipe = false;
       alert('✅ המתכון נוסף בהצלחה!');
     },
@@ -146,6 +151,7 @@ export class HomeComponent implements OnInit {
     this.isEditingRecipe = true;
     this.editingRecipeId = recipe.id;
     this.newRecipe = { ...recipe };
+    this.selectedImage = recipe.imageUrl || '';
   }
 
   saveEditedRecipe(): void {
@@ -181,12 +187,16 @@ export class HomeComponent implements OnInit {
     this.newRecipe.ingredients || '',
     this.newRecipe.instructions || '',
     this.newRecipe.tags || '',
-    this.newRecipe.preparationTime || 0
+    this.newRecipe.preparationTime || 0,
+    this.newRecipe.imageUrl || ''  // ← הוסף את imageUrl!
   ).subscribe({
     next: (updatedRecipe: Recipe) => {
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+          if (fileInput) fileInput.value = '';
       const index = this.recipes.findIndex(r => r.id === this.editingRecipeId);
       if (index !== -1) {
         this.recipes[index] = updatedRecipe;
+        this.filteredRecipes = [...this.recipes];  // ← עדכן את filteredRecipes!
       }
       this.cancelEdit();
       this.isAddingRecipe = false;
@@ -201,6 +211,7 @@ export class HomeComponent implements OnInit {
 }
 
 
+
   cancelEdit(): void {
     this.isEditingRecipe = false;
     this.editingRecipeId = null;
@@ -209,8 +220,10 @@ export class HomeComponent implements OnInit {
       ingredients: '',
       instructions: '',
       tags: '',
-      preparationTime: undefined
+      preparationTime: undefined,
+      imageUrl: ''
     };
+    this.selectedImage = ''
   }
 
   deleteRecipe(recipeId: number): void {

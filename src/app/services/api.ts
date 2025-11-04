@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -60,13 +61,14 @@ export class ApiService {
     });
   }
   
-  createRecipe(title: string, ingredients: string, instructions: string, tags: string, preparationTime: number): Observable<any> {
+  createRecipe(title: string, ingredients: string, instructions: string, tags: string, preparationTime: number, imageUrl: string = ''): Observable<any> {
     return this.http.post(`${this.apiUrl}/recipes`, {
       title,
       ingredients,
       instructions,
       tags,
-      preparationTime
+      preparationTime,
+      imageUrl
     }, {
       headers: {
         Authorization: `Bearer ${this.getToken()}`
@@ -74,13 +76,14 @@ export class ApiService {
     });
   }
   
-  updateRecipe(id: number, title: string, ingredients: string, instructions: string, tags: string, preparationTime: number): Observable<any> {
+  updateRecipe(id: number, title: string, ingredients: string, instructions: string, tags: string, preparationTime: number, imageUrl: string = ''): Observable<any> {
     return this.http.put(`${this.apiUrl}/recipes/${id}`, {
       title,
       ingredients,
       instructions,
       tags,
-      preparationTime
+      preparationTime,
+      imageUrl
     }, {
       headers: {
         Authorization: `Bearer ${this.getToken()}`
@@ -105,8 +108,7 @@ export class ApiService {
   }
 
   uploadImageToCloudinary(formData: FormData, cloudName: string): Observable<any> {
-  const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-  return this.http.post(url, formData);
-}
-
+    const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    return this.http.post(url, formData);
+  }
 }
