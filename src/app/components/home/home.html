@@ -1,171 +1,236 @@
-<div class="min-h-screen bg-gray-50">
-  <!-- Navbar -->
-  <nav class="bg-white shadow-md p-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-gray-800">שלום, {{ username }}! 👋</h1>
-    <button 
-      (click)="logout()"
-      class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-    >
-      התנתק
-    </button>
-  </nav>
+<div class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900" dir="rtl">
 
-  <!-- Search Bar -->
-  <div class="bg-white shadow-md p-4 mb-8">
-    <div class="max-w-6xl mx-auto flex gap-4">
-      <input 
-        type="text" 
-        [(ngModel)]="searchTerm" 
-        name="searchTerm"
-        placeholder="🔍 חפש לפי תגיות..."
-        (input)="searchByTag()"
-        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20 shadow-lg">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+          🍳 MyRecipes
+        </h1>
+        <p class="text-white/70 ml-4"> 👋 ברוך/ה הבא {{ username }} </p>
+      </div>
       <button 
-        (click)="clearSearch()"
-        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition"
+        (click)="logout()"
+        class="btn btn-error btn-sm gap-2"
       >
-        ✕ נקה
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        התנתק
       </button>
     </div>
-    <p class="max-w-6xl mx-auto mt-2 text-sm text-gray-600">
-      <strong>תוצאות:</strong> {{ filteredRecipes.length }} מתכון(ים)
-    </p>
-  </div>
+  </nav>
 
-  <div class="max-w-6xl mx-auto p-8">
-    <!-- Loading Spinner -->
-    <div *ngIf="isLoadingRecipes" class="flex justify-center items-center gap-4 py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <p class="text-gray-600 text-lg">טוען מתכונים...</p>
-    </div>
+  <div class="max-w-7xl mx-auto p-6">
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      
+      <!-- Left Side - Form (3 columns) -->
+      <div class="lg:col-span-3">
+        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
+          <h2 class="text-3xl font-bold text-white mb-6">
+            {{ isEditingRecipe ? '✏️ ערוך מתכון' : '➕ מתכון חדש' }}
+          </h2>
+          
+          <form (ngSubmit)="isEditingRecipe ? saveEditedRecipe() : addRecipe()" class="space-y-5">
+            <!-- Title -->
+            <div>
+              <label class="block text-white/80 font-semibold mb-2">שם המתכון</label>
+              <input 
+                type="text" 
+                [(ngModel)]="newRecipe.title" 
+                name="title"
+                placeholder="למשל: עוגת שוקולד..."
+                class="input input-bordered w-full bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-purple-500"
+              />
+            </div>
 
-    <!-- Add/Edit Recipe Section -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">
-        {{ isEditingRecipe ? 'עדכן מתכון' : 'הוסף מתכון חדש' }}
-      </h2>
-      <form (ngSubmit)="isEditingRecipe ? saveEditedRecipe() : addRecipe()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input 
-          type="text" 
-          [(ngModel)]="newRecipe.title" 
-          name="title"
-          placeholder="שם המתכון"
-          class="col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <textarea 
-          [(ngModel)]="newRecipe.ingredients" 
-          name="ingredients"
-          placeholder="רכיבים"
-          class="col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
-        ></textarea>
-        <textarea 
-          [(ngModel)]="newRecipe.instructions" 
-          name="instructions"
-          placeholder="הוראות הכנה"
-          class="col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
-        ></textarea>
-        <input 
-          type="text" 
-          [(ngModel)]="newRecipe.tags" 
-          name="tags"
-          placeholder="תגיות (מופרדות בפסיק)"
-          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input 
-          type="number" 
-          [(ngModel)]="newRecipe.preparationTime" 
-          name="preparationTime"
-          placeholder="זמן הכנה (דקות)"
-          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <!-- Image Upload -->
-        <div class="col-span-2">
-        <label class="block text-gray-700 font-bold mb-2">
-            📸 בחר תמונה (אופציונלי):
-        </label>
-        <div class="flex gap-2">
+            <!-- Ingredients -->
+            <div>
+              <label class="block text-white/80 font-semibold mb-2">🥘 רכיבים</label>
+              <textarea 
+                [(ngModel)]="newRecipe.ingredients" 
+                name="ingredients"
+                placeholder="רשום כל רכיב בשורה חדשה..."
+                class="textarea textarea-bordered w-full h-24 bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-purple-500"
+              ></textarea>
+            </div>
+
+            <!-- Instructions -->
+            <div>
+              <label class="block text-white/80 font-semibold mb-2">📝 הוראות הכנה</label>
+              <textarea 
+                [(ngModel)]="newRecipe.instructions" 
+                name="instructions"
+                placeholder="תאר את שלבי ההכנה בפירוט..."
+                class="textarea textarea-bordered w-full h-24 bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-purple-500"
+              ></textarea>
+            </div>
+
+            <!-- Tags & Time -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-white/80 font-semibold mb-2">🏷️ תגיות</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="newRecipe.tags" 
+                  name="tags"
+                  placeholder="עוגה, שוקולד..."
+                  class="input input-bordered w-full bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-purple-500"
+                />
+              </div>
+              <div>
+                <label class="block text-white/80 font-semibold mb-2">⏱️ זמן (דקות)</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="newRecipe.preparationTime" 
+                  name="preparationTime"
+                  placeholder="זמן הכנה (דקות)"
+                  class="input input-bordered w-full bg-white/5 border-white/20 text-white placeholder-white/40 focus:border-purple-500"
+                />
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-4">
+              <button 
+                type="submit" 
+                [disabled]="isAddingRecipe"
+                class="btn btn-gradient flex-1 gap-2"
+              >
+                {{ isAddingRecipe ? '⏳ טוען...' : (isEditingRecipe ? '💾 שמור שינויים' : '✅ הוסף מתכון') }}
+              </button>
+              <button 
+                *ngIf="isEditingRecipe"
+                type="button" 
+                (click)="cancelEdit()"
+                class="btn btn-ghost flex-1"
+              >
+                ❌ ביטול
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Side - Image Upload & Search (2 columns) -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Image Upload Card -->
+        <div class="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-md border border-purple-400/30 rounded-2xl p-6 shadow-xl">
+          <h3 class="text-xl font-bold text-white mb-4">📸 תמונה</h3>
+          
+          <div class="space-y-4">
+            <!-- File Input -->
             <input 
-            type="file" 
-            accept="image/*"
-            (change)="onImageSelected($event)"
-            [disabled]="isUploadingImage"
-            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              type="file" 
+              accept="image/*"
+              (change)="onImageSelected($event)"
+              [disabled]="isUploadingImage"
+              class="file-input file-input-bordered file-input-primary w-full bg-white/5"
+            />
+
+            <!-- Image Preview -->
+            <div *ngIf="selectedImage" class="relative group">
+              <img 
+                [src]="selectedImage" 
+                alt="תצוגה מקדימה"
+                class="w-full h-48 object-cover rounded-xl shadow-lg transition-transform group-hover:scale-105"
+              />
+              <button 
+                type="button"
+                (click)="clearImage()"
+                class="absolute top-2 right-2 btn btn-circle btn-sm btn-error"
+              >
+                ✕
+              </button>
+              <div *ngIf="isUploadingImage" class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
+                <span class="loading loading-spinner loading-lg text-primary"></span>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!selectedImage" class="border-2 border-dashed border-white/30 rounded-xl p-8 text-center bg-white/5 hover:bg-white/10 transition">
+              <p class="text-white/60">בחר תמונה או גרור לכאן</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Card -->
+        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-xl">
+          <h3 class="text-xl font-bold text-white mb-4">🔍 חיפוש</h3>
+          
+          <div class="space-y-3">
+            <input 
+              type="text" 
+              [(ngModel)]="searchTerm" 
+              name="searchTerm"
+              placeholder="חפש לפי תגיות..."
+              (input)="searchByTag()"
+              class="input input-bordered w-full bg-white/5 border-white/20 text-white"
             />
             <button 
-            *ngIf="selectedImage"
-            type="button"
-            (click)="clearImage()"
-            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition"
+              (click)="clearSearch()"
+              class="btn btn-ghost w-full"
             >
-            ✕
+              ✕ נקה חיפוש
             </button>
-        </div>
-        
-        <!-- Image Preview -->
-        <div *ngIf="selectedImage" class="mt-4">
-            <img 
-            [src]="selectedImage" 
-            alt="תצוגה מקדימה"
-            class="w-full h-40 object-cover rounded-lg"
-            />
-        </div>
-        
-        <!-- Upload Status -->
-        <div *ngIf="isUploadingImage" class="mt-2 text-blue-600">
-            <p>🔄 מעלה תמונה...</p>
-        </div>
-        </div>
-        <button 
-          type="submit" 
-          [disabled]="isAddingRecipe"
-          class="col-span-2 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:opacity-50"
-        >
-          {{ isAddingRecipe ? 'טוען...' : (isEditingRecipe ? 'שמור שינויים' : 'הוסף מתכון') }}
-        </button>
-        <button 
-          *ngIf="isEditingRecipe"
-          type="button" 
-          (click)="cancelEdit()"
-          class="col-span-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition"
-        >
-          ביטול
-        </button>
-      </form>
-    </div>
-
-    <!-- Recipes List -->
-    <div *ngIf="!isLoadingRecipes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div *ngFor="let recipe of filteredRecipes" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-        <img *ngIf="recipe.imageUrl" [src]="recipe.imageUrl" alt="תמונת המתכון" class="w-full h-40 object-cover rounded-lg mb-4"/>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ recipe.title }}</h3>
-        <p class="text-gray-600 mb-2"><strong>רכיבים:</strong> {{ recipe.ingredients }}</p>
-        <p class="text-gray-600 mb-2"><strong>הוראות:</strong> {{ recipe.instructions }}</p>
-        <p class="text-gray-600 mb-2"><strong>תגיות:</strong> {{ recipe.tags }}</p>
-        <p class="text-gray-600 mb-4"><strong>זמן הכנה:</strong> {{ recipe.preparationTime }} דקות</p>
-        
-        <div class="flex gap-2">
-          <button 
-            (click)="editRecipe(recipe)"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition"
-          >
-            עריכה
-          </button>
-          <button 
-            (click)="deleteRecipe(recipe.id)"
-            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition"
-          >
-            מחיקה
-          </button>
+          </div>
+          
+          <div class="mt-4 badge badge-primary">
+            {{ filteredRecipes.length }} מתכונים
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- No Recipes Message -->
-    <div *ngIf="!isLoadingRecipes && filteredRecipes.length === 0" class="text-center py-12">
-      <p class="text-gray-500 text-xl">
-        {{ searchTerm ? 'אין מתכונים עם התגית: ' + searchTerm : 'אין לך מתכונים עדיין. הוסף מתכון חדש!' }}
-      </p>
+    <!-- Recipes Grid -->
+    <div class="mt-12">
+      <h2 class="text-3xl font-bold text-white mb-6">🍽️ המתכונים שלך</h2>
+      
+      <div *ngIf="isLoadingRecipes" class="flex justify-center items-center py-12">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+
+      <div *ngIf="!isLoadingRecipes && filteredRecipes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let recipe of filteredRecipes" class="card bg-gradient-to-br from-white/10 to-white/5 border border-white/20 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+          
+          <!-- Image -->
+          <figure *ngIf="recipe.imageUrl" class="overflow-hidden h-48">
+            <img [src]="recipe.imageUrl" alt="תמונת מתכון" class="w-full h-full object-cover transition-transform hover:scale-110"/>
+          </figure>
+
+          <div class="card-body">
+            <h3 class="card-title text-white">{{ recipe.title }}</h3>
+            
+            <div class="space-y-2 text-white/80 text-sm">
+              <p>🥘 <strong>רכיבים:</strong> {{ recipe.ingredients | slice:0:50 }}...</p>
+              <p>📝 <strong>הוראות:</strong> {{ recipe.instructions | slice:0:50 }}...</p>
+              <p>🏷️ <strong>תגיות:</strong> {{ recipe.tags }}</p>
+              <p>⏱️ <strong>זמן:</strong> {{ recipe.preparationTime }} דקות</p>
+            </div>
+
+            <div class="card-actions justify-between mt-4">
+              <button 
+                (click)="editRecipe(recipe)"
+                class="btn btn-primary btn-sm"
+              >
+                ✏️ ערוך
+              </button>
+              <button 
+                (click)="deleteRecipe(recipe.id)"
+                class="btn btn-error btn-sm"
+              >
+                🗑️ מחק
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoadingRecipes && filteredRecipes.length === 0" class="text-center py-16">
+        <p class="text-white/60 text-lg">{{ searchTerm ? 'לא נמצאו מתכונים 😞' : 'אין מתכונים עדיין. בואו נהתחיל! 🎉' }}</p>
+      </div>
     </div>
   </div>
 </div>
